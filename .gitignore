@@ -3,6 +3,7 @@
 !.gitignore
 !Makefile
 !README.md
+!UNLICENSE
 
 !src/*.c
 !src/*.h
