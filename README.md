@@ -1,6 +1,6 @@
-#TF2 patcher for full-colored decals
+# TF2 patcher for full-colored decals
 
-##Summary
+## Summary
 
 This tool allows you to remove various restrictions when applying a decal to a decalable item in TF2.
 
@@ -9,7 +9,7 @@ In short, now you can apply fully-colored images to your Objectors, Flairs, Phot
 This is a complete rewrite of [tf2-decal-patcher](https://github.com/unnamed10/tf2-decal-patcher).
 
 
-##Is it safe?
+## Is it safe?
 
 It is completely safe to use. However:
 
@@ -18,7 +18,7 @@ It is completely safe to use. However:
 - After running this tool, be sure to close TF2. You can then safely open it again. This is not strictly necessary, but it's best to clear all memory modifications before connecting to a secure server.
 
 
-##How to use
+## How to use
 
 1. Download the latest release;
 
@@ -29,7 +29,7 @@ It is completely safe to use. However:
 4. After you've applied your decal, close TF2 in order to remove any modifications caused by the patcher.
 
 
-##Building from source
+## Building from source
 
 Just run `make`.
 
@@ -37,7 +37,7 @@ C11-aware compiler is required.
 
 
 
-##How does it work
+## How does it work
 Due to a recent TF2 source code leak it became incredibly easy to determine the most optimal patching strategy for decal stuff.
 
 Old patcher used a complicated and inefficient method that required you to enter an image path manually.
@@ -51,16 +51,16 @@ What exactly gets patched:
 - bDoBlendLayers conditional jump gets changed to an inconditional jump (this skips all blending code altogether).
 
 
-##Linux support?
+## Linux support?
 Currently this project can only be built for Windows (both x86 and x86-64).
 
 If you really need Linux binaries, create an issue and I'll take it from there.
 
 
-##License
+## License
 
 See UNLICENSE file.
 
 
-##Contact
+## Contact
 [Steam](https://steamcommunity.com/id/unnamed10) | Discord: default_username#6209
