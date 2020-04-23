@@ -1,0 +1,8 @@
+*.*
+
+!.gitignore
+!Makefile
+!README.md
+
+!src/*.c
+!src/*.h
