@@ -48,7 +48,7 @@ void *find_mem(const void *pattern, size_t sz, unsigned char *search_base, size_
 	unsigned char buf[4096];
 	size_t num_bad_read = 0;
 
-  assert(pattern && sz && search_base && search_size);
+	assert(pattern && sz && search_base && search_size);
 
 	unsigned char *this = search_base;
 	unsigned char *end = search_base + search_size;

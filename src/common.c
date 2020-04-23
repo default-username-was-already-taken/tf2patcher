@@ -63,7 +63,7 @@ char *extract_file_name(const char *name, char *buf, size_t sz)
 
 
 #ifdef WINDOWS
-  // describe error code provided by GetLastError
+	// describe error code provided by GetLastError
 	char* describe_error(char *buf, size_t sz)
 	{
 		assert(buf && sz);

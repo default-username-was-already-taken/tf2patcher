@@ -55,9 +55,9 @@
 
 				for (unsigned int i = 0; i < num_modules; i++) {
 					if (GetModuleFileNameEx(process, modules[i], module_name, sizeof(module_name)) &&
-						  !strcasecmp(extract_file_name(module_name, tempbuf, sizeof(tempbuf)), "client.dll")) {
+							!strcasecmp(extract_file_name(module_name, tempbuf, sizeof(tempbuf)), "client.dll")) {
 						verbose_print("Found TF2 client.dll (%u/%u)\n", i + 1, num_modules);
-					  return modules[i];
+						return modules[i];
 					}
 				}
 			}
@@ -77,10 +77,10 @@
 		HWND window = get_tf2_window();
 
 		DWORD process_id;
-	  GetWindowThreadProcessId(window, &process_id);
-	  HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_id);
+		GetWindowThreadProcessId(window, &process_id);
+		HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_id);
 
-	  if (!process) {
+		if (!process) {
 			fprintf(stderr, "Cannot attach to TF2 process: %s\n", describe_error(error_buf, sizeof(error_buf)));
 		} else {
 			verbose_print("Attached to TF2 process with PID %u\n", process_id);
@@ -107,7 +107,7 @@
 		IMAGE_DOS_HEADER dos_hdr;
 		IMAGE_NT_HEADERS nt_hdr;
 		if (read_mem(pinfo.cl_base, &dos_hdr, sizeof(dos_hdr)) &&
-		    read_mem(pinfo.cl_base + dos_hdr.e_lfanew, &nt_hdr, sizeof(nt_hdr))) {
+				read_mem(pinfo.cl_base + dos_hdr.e_lfanew, &nt_hdr, sizeof(nt_hdr))) {
 			pinfo.cl_size = nt_hdr.OptionalHeader.SizeOfImage;
 			verbose_print("TF2 client.dll module: %#x with sz=%#x\n", pinfo.cl_base, pinfo.cl_size);
 			return true;
@@ -162,7 +162,7 @@ bool do_patch(void)
 		// disable blending
 		// check memory first
 		unsigned char pattern2[] = {0x80, 0x3D, 0xFF, 0xFF, 0xFF, 0xFF, 0x00,
-															  0x74};
+																0x74};
 
 		addr = find_mem(pattern2, sizeof(pattern2), addr, 200);
 		if (!addr) {
@@ -188,10 +188,10 @@ bool do_patch(void)
 int main(int argc, char *argv[])
 {
 	printf("  --------------------------------------------\n"
-			   "  |       TF2 decal tool patcher 2.0.0       |\n"
-			   "  | (c) default-username, Apr 2020, Mar 2016 |\n"
+				 "  |       TF2 decal tool patcher 2.0.0       |\n"
+				 "  | (c) default-username, Apr 2020, Mar 2016 |\n"
 				 "  --------------------------------------------\n"
-			   "\n");
+				 "\n");
 
 	if (argv) {
 		for (int i = 0; i < argc; i++) {
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 				if (!strcasecmp(argv[i], "-h") || !strcasecmp(argv[i], "--help")) {
 					printf("Usage: tf2patcher -[hv]\n"
 								 "       -h | --help    : show this help\n"
-						     "       -v | --verbose : be more verbose\n");
+								 "       -v | --verbose : be more verbose\n");
 					return EXIT_SUCCESS;
 				} else if (!strcasecmp(argv[i], "-v") || !strcasecmp(argv[i], "--verbose")) {
 					pinfo.verbose_mode = true;
