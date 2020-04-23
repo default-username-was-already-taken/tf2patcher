@@ -4,15 +4,15 @@
 #include "base.h"
 
 typedef struct pinfo_s {
-	bool verbose_mode;
+    bool verbose_mode;
 
-	#ifdef WINDOWS
-		HANDLE process;
-		HMODULE module;
-	#endif
+    #ifdef WINDOWS
+        HANDLE process;
+        HMODULE module;
+    #endif
 
-	unsigned char *cl_base;
-	size_t cl_size;
+    unsigned char *cl_base;
+    size_t cl_size;
 
 } pinfo_t;
 
@@ -27,7 +27,7 @@ char *strlecpy(char *dst, const char *src, size_t sz);
 char *extract_file_name(const char *name, char *buf, size_t sz);
 
 #ifdef WINDOWS
-	char* describe_error(char *buf, size_t sz);
+    char* describe_error(char *buf, size_t sz);
 #endif
 
 #endif

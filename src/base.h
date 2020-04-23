@@ -11,12 +11,12 @@
 
 // normalize platform-dependent definitions
 #if defined(_WIN32)
-	#define WINDOWS
+    #define WINDOWS
 #elif defined(__linux__) || defined(linux)
-	#define LINUX
+    #define LINUX
 #endif
 
 #ifdef WINDOWS
-	#include "windows.h"
-	#include "psapi.h"
+    #include "windows.h"
+    #include "psapi.h"
 #endif
