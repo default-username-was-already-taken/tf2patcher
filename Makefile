@@ -29,15 +29,21 @@ endif
 
 
 all: $(dirs) $(objects)
-	$(CC) $(CFLAGS) $(objects) -o $(appname) $(LFLAGS)
+	$(CC) $(ARCH) $(CFLAGS) $(objects) -o $(appname) $(LFLAGS)
 
 $(objects): $(objdir)/%.o: $(srcdir)/%.c $(headers)
-	$(CC) $(CFLAGS) -I$(srcdir) -c $< -o $@
+	$(CC) $(ARCH) $(CFLAGS) -I$(srcdir) -c $< -o $@
 
 $(dirs):
 	$(MKDIR) $@
 
+win32: ARCH=-m32
+win32: all
+
+win64: ARCH=-m64
+win64: all
+
 clean:
 	$(RM) $(call slashfix,$(objects)) $(call slashfix,$(appname))
 
-.PHONY: all clean
+.PHONY: all clean win32 win64

@@ -6,7 +6,7 @@
 bool read_mem(const void *base, void *buf, size_t sz)
 {
     char error_buf[8192];
-    size_t bytes_read = 0;
+    SIZE_T bytes_read = 0;
 
     assert(base && buf && sz);
 
@@ -14,7 +14,7 @@ bool read_mem(const void *base, void *buf, size_t sz)
         fprintf(stderr, "Read error: %s\n", describe_error(error_buf, sizeof(error_buf)));
     } else {
         if (bytes_read != sz) {
-            fprintf(stderr, "Read error: got %zu bytes, expected %zu\n", bytes_read, sz);
+            fprintf(stderr, "Read error");
         } else {
             return true;
         }
@@ -96,7 +96,7 @@ void *find_mem_cl(const void *pattern, size_t sz)
 bool set_mem(void *addr, const unsigned char pat[], size_t sz)
 {
     char error_buf[8192];
-    size_t bytes_written = 0;
+    SIZE_T bytes_written = 0;
 
     assert(addr && pat && sz);
 
@@ -104,7 +104,7 @@ bool set_mem(void *addr, const unsigned char pat[], size_t sz)
         fprintf(stderr, "Write error: %s\n", describe_error(error_buf, sizeof(error_buf)));
     } else {
         if (bytes_written != sz) {
-            fprintf(stderr, "Write error: got %zu bytes, expected %zu\n", bytes_written, sz);
+            fprintf(stderr, "Write error");
         } else {
             return true;
         }
