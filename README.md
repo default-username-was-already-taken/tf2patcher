@@ -20,7 +20,7 @@ It is completely safe to use. However:
 
 ## How to use
 
-1. Download the latest release;
+1. Download the latest release [here](https://github.com/default-username-was-already-taken/tf2patcher/releases/latest);
 
 2. Run tf2patcher.exe and launch TF2 (or do it in reverse, the order does not matter);
 
