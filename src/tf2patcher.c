@@ -53,17 +53,17 @@
 
                 verbose_print("Found %u modules in TF2 process\n", num_modules);
 
-                for (unsigned int i = 0; i < num_modules; i++) {
+                for (size_t i = 0; i < num_modules; i++) {
                     if (GetModuleFileNameEx(process, modules[i], module_name, sizeof(module_name)) &&
                             !strcasecmp(extract_file_name(module_name, tempbuf, sizeof(tempbuf)), "client.dll")) {
-                        verbose_print("Found TF2 client.dll (%u/%u)\n", i + 1, num_modules);
+                        verbose_print("Found TF2 client.dll (%zu/%u)\n", i + 1, num_modules);
                         return modules[i];
                     }
                 }
             }
 
             Sleep(1000);
-        } while (num_retry++ <= 15);
+        } while (num_retry++ <= 30);
 
         fprintf(stderr, "Failed to find TF2 client.dll module!\n");
         return 0;
@@ -106,10 +106,13 @@
 
         IMAGE_DOS_HEADER dos_hdr;
         IMAGE_NT_HEADERS nt_hdr;
+
         if (read_mem(pinfo.cl_base, &dos_hdr, sizeof(dos_hdr)) &&
-                read_mem(pinfo.cl_base + dos_hdr.e_lfanew, &nt_hdr, sizeof(nt_hdr))) {
+            read_mem(pinfo.cl_base + dos_hdr.e_lfanew, &nt_hdr, sizeof(nt_hdr))) {
+
             pinfo.cl_size = nt_hdr.OptionalHeader.SizeOfImage;
-            verbose_print("TF2 client.dll module: %#x with sz=%#x\n", pinfo.cl_base, pinfo.cl_size);
+            verbose_print("TF2 client.dll module: 0x%" PRIXPTR " with sz=%zu\n",
+                    (uintptr_t)pinfo.cl_base, pinfo.cl_size);
             return true;
         }
 
@@ -148,18 +151,16 @@ bool do_patch(void)
         0x83, 0xE8, 0x00
     };
 
-
     unsigned char *addr = find_mem_cl(pattern, sizeof(pattern));
     if (!addr) {
         fprintf(stderr, "Failed to find CConfirmCustomizeTextureDialog::PerformFilter pattern in client library!\n");
     } else {
-        verbose_print("CConfirmCustomizeTextureDialog::PerformFilter pattern addr: %p\n", addr);
+        verbose_print("CConfirmCustomizeTextureDialog::PerformFilter pattern addr: 0x%" PRIXPTR "\n", (uintptr_t)addr);
 
         // rewrite call to mov in order to force identity filter
         addr += 16;
-        set_mem(addr, (unsigned char[]){0xB8, 0x01, 0x00, 0x00, 0x00}, 5);
+        set_mem(addr, (unsigned char []){0xB8, 0x01, 0x00, 0x00, 0x00}, 5);
         verbose_print("Rewrote CALL to MOV\n");
-
 
         // disable blending
         // check memory first
@@ -174,7 +175,7 @@ bool do_patch(void)
         } else {
             // rewrite jz to jmp
             addr += 7;
-            set_mem(addr, (unsigned char[]){0xEB}, 1);
+            set_mem(addr, (unsigned char []){0xEB}, 1);
             verbose_print("Rewrote JZ to JMP\n");
 
             // and thats pretty much it
@@ -193,7 +194,7 @@ int main(int argc, char *argv[])
 {
     printf(
         "  --------------------------------------------\n"
-        "  |       TF2 decal tool patcher 2.0.0       |\n"
+        "  |       TF2 decal tool patcher 2.0.1       |\n"
         "  | (c) default-username, Apr 2020, Mar 2016 |\n"
         "  --------------------------------------------\n"
         "\n");
@@ -221,6 +222,9 @@ int main(int argc, char *argv[])
     bool res = attach_to_tf2() && calc_client_module_bounds() && do_patch();
 
     free_resources();
+
+    printf("Press ENTER to exit...");
+    getchar();
 
     return res ? EXIT_SUCCESS : EXIT_FAILURE;
 }

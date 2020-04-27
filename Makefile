@@ -1,7 +1,7 @@
 # GNU makefile for tf2patcher
 
 CC = gcc
-CFLAGS += -Wall -Wextra -Werror -O2 -std=c11
+CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter -O2 -std=c11
 
 bindir := bin
 objdir := obj
