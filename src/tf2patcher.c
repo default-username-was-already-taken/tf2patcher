@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 {
     printf(
         "  --------------------------------------------\n"
-        "  |       TF2 decal tool patcher 2.0.1       |\n"
+        "  |       TF2 decal tool patcher 2.0.2       |\n"
         "  | (c) default-username, Apr 2020, Mar 2016 |\n"
         "  --------------------------------------------\n"
         "\n");
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 
     free_resources();
 
-    printf("Press ENTER to exit...");
+    printf("Press ENTER to exit...\n");
     getchar();
 
     return res ? EXIT_SUCCESS : EXIT_FAILURE;

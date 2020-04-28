@@ -7,3 +7,5 @@
 
 !src/*.c
 !src/*.h
+!src/winres/*.manifest
+!src/winres/*.rc

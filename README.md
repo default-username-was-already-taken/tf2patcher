@@ -31,10 +31,9 @@ It is completely safe to use. However:
 
 ## Building from source
 
-Just run `make`.
+Run `make TARGET=32` or `make TARGET=64`, depending on which architecture you want to build for.
 
 C11-aware compiler is required.
-
 
 
 ## How does it work
