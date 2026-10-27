@@ -13,24 +13,49 @@
 // TODO implement these for linux
 #ifdef WINDOWS
 
-    // acquire hwnd to tf2 window
-    // wait if the window is not there yet
-    HWND get_tf2_window(void)
-    {
-        const char *window_name = "Team Fortress 2";
+    #include <tlhelp32.h>
 
-        HWND window = FindWindow(NULL, window_name);
-        if (!window) {
+    // find tf2 process id by executable name (tf_win.exe / tf_win64.exe)
+    static DWORD find_tf2_process_id(void)
+    {
+        DWORD pid = 0;
+        HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (snap == INVALID_HANDLE_VALUE) {
+            return 0;
+        }
+
+        PROCESSENTRY32 pe;
+        pe.dwSize = sizeof(pe);
+        if (Process32First(snap, &pe)) {
+            do {
+                if (!strcasecmp(pe.szExeFile, "tf_win64.exe") || !strcasecmp(pe.szExeFile, "tf_win.exe") ||
+                        !strcasecmp(pe.szExeFile, "hl2.exe")) {
+                    pid = pe.th32ProcessID;
+                    break;
+                }
+            } while (Process32Next(snap, &pe));
+        }
+
+        CloseHandle(snap);
+        return pid;
+    }
+
+
+    // wait until tf2 process shows up
+    DWORD get_tf2_process_id(void)
+    {
+        DWORD pid = find_tf2_process_id();
+        if (!pid) {
             printf("Waiting for TF2 to start...\n");
 
             do {
                 Sleep(1000);
-                window = FindWindow(NULL, window_name);
-            } while (!window);
+                pid = find_tf2_process_id();
+            } while (!pid);
         }
 
-        verbose_print("Found TF2 window with HWND %u\n", window);
-        return window;
+        verbose_print("Found TF2 process with PID %u\n", (unsigned int)pid);
+        return pid;
     }
 
 
@@ -74,10 +99,7 @@
     {
         char error_buf[8192];
 
-        HWND window = get_tf2_window();
-
-        DWORD process_id;
-        GetWindowThreadProcessId(window, &process_id);
+        DWORD process_id = get_tf2_process_id();
         HANDLE process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, process_id);
 
         if (!process) {
@@ -110,6 +132,8 @@
         if (read_mem(pinfo.cl_base, &dos_hdr, sizeof(dos_hdr)) &&
             read_mem(pinfo.cl_base + dos_hdr.e_lfanew, &nt_hdr, sizeof(nt_hdr))) {
 
+            // PE32+ (0x20B) means the game is running as 64-bit
+            pinfo.is64 = nt_hdr.OptionalHeader.Magic == 0x20B;
             pinfo.cl_size = nt_hdr.OptionalHeader.SizeOfImage;
             verbose_print("TF2 client.dll module: 0x%" PRIXPTR " with sz=%zu\n",
                     (uintptr_t)pinfo.cl_base, pinfo.cl_size);
@@ -142,7 +166,7 @@ bool do_patch(void)
     printf("Patching...\n");
 
     // CConfirmCustomizeTextureDialog::PerformFilter
-    unsigned char pattern[] = {
+    unsigned char pattern32[] = {
         0x6A, 0x04,
         0x8B, 0x01,
         0xFF, 0x90, 0xFF, 0xFF, 0x00, 0x00, // mask first two bytes in opcode param
@@ -150,15 +174,41 @@ bool do_patch(void)
         0xE8, 0xFF, 0xFF, 0xFF, 0xFF,       // mask call parm
         0x83, 0xE8, 0x00
     };
+    unsigned char pattern64[] = {
+        0xBA, 0x04, 0x00, 0x00, 0x00,
+        0x48, 0x8B, 0x01,
+        0xFF, 0x90, 0xFF, 0xFF, 0x00, 0x00, // mask vtable offset
+        0x48, 0x8B, 0x8B, 0xFF, 0xFF, 0x00, 0x00, // mask member offset
+        0xE8, 0xFF, 0xFF, 0xFF, 0xFF,       // mask call parm
+        0x85, 0xC0,
+        0x74, 0xFF,
+        0x83, 0xE8, 0x01
+    };
 
-    unsigned char *addr = find_mem_cl(pattern, sizeof(pattern));
+    const unsigned char *pattern = pinfo.is64 ? pattern64 : pattern32;
+    const size_t pattern_size = pinfo.is64 ? sizeof(pattern64) : sizeof(pattern32);
+    const size_t call_offset = pinfo.is64 ? 21 : 16;
+    printf("Target is %s TF2\n", pinfo.is64 ? "64-bit" : "32-bit");
+
+    unsigned char *addr = find_mem_cl(pattern, pattern_size);
+    if (!addr) {
+        // maybe we already patched this session: the call is a mov eax, 1 now
+        unsigned char patched[sizeof(pattern64)];
+        memcpy(patched, pattern, pattern_size);
+        memcpy(patched + call_offset, (unsigned char []){0xB8, 0x01, 0x00, 0x00, 0x00}, 5);
+
+        if (find_mem_cl(patched, pattern_size)) {
+            printf("TF2 is already patched. Restart TF2 if you want to undo it.\n");
+            return true;
+        }
+    }
     if (!addr) {
         fprintf(stderr, "Failed to find CConfirmCustomizeTextureDialog::PerformFilter pattern in client library!\n");
     } else {
         verbose_print("CConfirmCustomizeTextureDialog::PerformFilter pattern addr: 0x%" PRIXPTR "\n", (uintptr_t)addr);
 
         // rewrite call to mov in order to force identity filter
-        addr += 16;
+        addr += call_offset;
         set_mem(addr, (unsigned char []){0xB8, 0x01, 0x00, 0x00, 0x00}, 5);
         verbose_print("Rewrote CALL to MOV\n");
 

@@ -5,6 +5,7 @@
 
 typedef struct pinfo_s {
     bool verbose_mode;
+    bool is64;
 
     #ifdef WINDOWS
         HANDLE process;

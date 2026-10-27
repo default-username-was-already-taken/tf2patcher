@@ -35,6 +35,8 @@ Run `make TARGET=32` or `make TARGET=64`, depending on which architecture you wa
 
 C11-aware compiler is required.
 
+TF2 now ships a 64-bit client (`tf\bin\x64\client.dll`), so use the **64-bit build** (`TARGET=64`) to patch the 64-bit game. The 32-bit build only works with the legacy 32-bit TF2 (`-32bit` launch option).
+
 
 ## How does it work
 Due to a recent TF2 source code leak it became incredibly easy to determine the most optimal patching strategy for decal stuff.
